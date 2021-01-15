@@ -1,0 +1,59 @@
+server:
+  port: 9902
+
+spring:
+  application:
+    name: spring-cloud-gateway
+
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: spring-cloud-config
+      profile: dev
+      name: redis
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      globalcors: #跨域全局配置
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+      routes:
+        - id: user
+          uri: lb://spring-cloud-user
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=2  # StripPrefix参数表示在将请求发送到下游之前从请求中剥离的路径个数。
+      default-filters: #全局过滤
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 300  #流速 每秒
+            redis-rate-limiter.burstCapacity: 5000   #令牌桶的容积
+            rate-limiter: "#{@defaultRedisRateLimiter}"  #SPEL表达式去的对应的bean  使用指定的限流器bean
+            key-resolver: "#{@apiKeyResolver}" #SPEL表达式去的对应的bean   以请求路由作为限流的key
+        - name: Hystrix
+          args:
+            name: fallbackcmd
+            fallbackUri: forward:/api/fallback
+
+auth:
+  skip:
+    urls:
+      /info/register,
+      /login/password,
+      /login/loginSms,
+      /info/pushSms,
+      /AliPay/aliNotify,
+      /login/oneLogin
+
+eureka:
+  client:
+    #    默认服务注册中心地址
+    fetch-registry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://localhost:9900/eureka/

@@ -1,0 +1,4 @@
+spring: #对时间类型进行序列化默认是UTC时区，设置上海时区
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8

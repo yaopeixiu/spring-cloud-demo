@@ -1,0 +1,35 @@
+server:
+  port: 9901
+
+spring:
+  application:
+    name: spring-cloud-config
+  profiles:
+    #    每个服务从配置中心获取自身配置所需的参数，active: native将会从项目的 resources路径下读取配置文件
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+        git:
+          uri: http://meng.zhang123.vip:8090/laizetao/taoke.git
+          username: config
+          password: 123456
+          # 指定搜索路径，如果有多个路径则使用,分隔
+          searchPaths: config/
+          # 对于使用git,svn做为后端配置，从远程库获取配置文件，需要存储到本地文件
+          basedir: /taoke/tmp/config
+          #basedir: D:/Config/basedir
+          # 配置中心通过git从远程git库，有时本地的拷贝被污染，这时配置中心无法从远程库更新本地配置,设置force-pull=true，则强制从远程库中更新本地库
+          force-pull: true
+      # 配置仓库的分支，如果添加label，配置文件访问路径将是http://localhost:9901/master/application-{profile}.yml
+#      label: master
+
+eureka:
+  client:
+    #    默认服务注册中心地址
+    fetch-registry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://localhost:9900/eureka/
